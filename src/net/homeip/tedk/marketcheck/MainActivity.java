@@ -200,12 +200,12 @@ public class MainActivity extends ExpandableListActivity {
             if (ai.sourceDir.startsWith("/system/app")) {
                systemApps.add(new AppInfo(ai.packageName,
                      checkPackage(ai.packageName)));
-            } else if (ai.sourceDir.startsWith("/data/app")) {
+            } else if (ai.sourceDir.startsWith("/data/app") || ai.sourceDir.startsWith("/mnt/asec")) {
                userApps.add(new AppInfo(ai.packageName,
                      checkPackage(ai.packageName)));
             } else {
                otherApps
-                     .add(new AppInfo(ai.packageName, AppInfo.Status.UNKNOWN));
+                     .add(new AppInfo(ai.sourceDir + "/" + ai.packageName, AppInfo.Status.UNKNOWN));
             }
             publishProgress();
          }
