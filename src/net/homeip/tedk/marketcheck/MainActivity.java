@@ -198,14 +198,12 @@ public class MainActivity extends ExpandableListActivity {
       protected Void doInBackground(Void... params) {
          for (ApplicationInfo ai : apps) {
             if (ai.sourceDir.startsWith("/system/app")) {
-               systemApps.add(new AppInfo(ai.packageName,
-                     checkPackage(ai.packageName)));
+               //systemApps.add(new AppInfo(ai.packageName, checkPackage(ai.packageName)));
+               systemApps.add(new AppInfo(ai.packageName, AppInfo.Status.UNKNOWN));
             } else if (ai.sourceDir.startsWith("/data/app") || ai.sourceDir.startsWith("/mnt/asec")) {
-               userApps.add(new AppInfo(ai.packageName,
-                     checkPackage(ai.packageName)));
+               userApps.add(new AppInfo(ai.packageName, checkPackage(ai.packageName)));
             } else {
-               otherApps
-                     .add(new AppInfo(ai.sourceDir + "/" + ai.packageName, AppInfo.Status.UNKNOWN));
+               otherApps.add(new AppInfo(ai.sourceDir + "/" + ai.packageName, AppInfo.Status.UNKNOWN));
             }
             publishProgress();
          }
@@ -265,25 +263,30 @@ public class MainActivity extends ExpandableListActivity {
    private AppInfo.Status checkPackage(String packageName) {
       AppInfo.Status status = AppInfo.Status.UNKNOWN;
       HttpURLConnection huc = null;
-      // OutputStream os = null;
       try {
          URL u = new URL("https://play.google.com/store/apps/details?id="
                + packageName);
          huc = (HttpURLConnection) u.openConnection();
-         // huc.setRequestMethod("GET");
+         huc.setInstanceFollowRedirects(true);
+         huc.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; ru; rv:1.9.0.11) Gecko/2009060215 Firefox/3.0.11 (.NET CLR 3.5.30729)");
          huc.connect();
-         // os = huc.getOutputStream();
          int code = huc.getResponseCode();
+         /*for(Entry<String, List<String>> field : huc.getHeaderFields().entrySet()) {
+        	 String values = "";
+        	 for(String value : field.getValue()) {
+        		 values += value + ", ";
+        	 }
+        	 Log.d("CheckPackageResult", field.getKey() + ": " + values);
+         }*/
+         Log.d("CheckPackage", packageName + ": " + code);
          if (code == 200) {
-            status = AppInfo.Status.GOOD;
+        	status = AppInfo.Status.GOOD;
          } else {
             status = AppInfo.Status.BAD;
          }
       } catch (Exception e) {
-         Log.d("CheckPackage", "Exception: " + e.toString());
+         Log.d("CheckPackage", "Unhandled Exception", e);
       } finally {
-         // if(os != null)
-         // try { os.close(); } catch (IOException e) {}
          if (huc != null) huc.disconnect();
       }
       return status;
